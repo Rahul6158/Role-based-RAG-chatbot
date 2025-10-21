@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG System Prompt Comparison</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --dark-bg: #0f172a;
+            --dark-surface: #1e293b;
+            --dark-card: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --accent: #8b5cf6;
+            --warning: #f59e0b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        h1 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .system-column {
+            background: var(--dark-surface);
+            border-radius: 1rem;
+            padding: 2rem;
+            border: 2px solid var(--primary);
+        }
+        
+        .system-column h2 {
+            text-align: center;
+            color: var(--secondary);
+            margin-bottom: 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--secondary);
+        }
+        
+        .prompt-section {
+            margin-bottom: 2rem;
+            background: var(--dark-card);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .prompt-section h3 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .prompt-code {
+            background: #1a202c;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+            border: 1px solid #2d3748;
+        }
+        
+        pre {
+            color: var(--text-secondary);
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            line-height: 1.4;
+        }
+        
+        .analysis {
+            background: rgba(99, 102, 241, 0.1);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .analysis h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .key-differences {
+            background: var(--dark-surface);
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-top: 3rem;
+            border: 2px solid var(--warning);
+        }
+        
+        .key-differences h2 {
+            color: var(--warning);
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .difference-item {
+            background: var(--dark-card);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--warning);
+        }
+        
+        @media (max-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>RAG System Prompt Comparison</h1>
+            <p>Traditional Q&A vs AI-Driven Insights Approach</p>
+        </header>
+
+        <div class="comparison-grid">
+            <!-- SYSTEM 1: TRADITIONAL RAG -->
+            <div class="system-column">
+                <h2>🚀 System 1: Enhanced Multi-Collection RAG</h2>
+                <p style="text-align: center; margin-bottom: 2rem; color: var(--text-secondary);">Traditional Q&A with Intelligent Routing</p>
+                
+                <!-- ROUTING PROMPT -->
+                <div class="prompt-section">
+                    <h3>🎯 Query Routing Prompt</h3>
+                    <div class="prompt-code">
+                        <pre>routing_prompt = f"""
+You are a query routing assistant. Classify the following user query into the most relevant document collection.
+
+Available Collections:
+1. PolavaramProject - Documents about Polavaram irrigation project, dam construction, water resources in Andhra Pradesh
+2. AmaravathiCapitalCity - Documents about Amaravathi capital city development, urban planning, infrastructure
+
+User Query: "{query}"
+
+Respond with ONLY the collection name: either "PolavaramProject" or "AmaravathiCapitalCity"
+"""</pre>
+                    </div>
+                    <div class="analysis">
+                        <h4>🔍 Analysis:</h4>
+                        <ul>
+                            <li><strong>Purpose</strong>: Route queries to correct document collection</li>
+                            <li><strong>Approach</strong>: Simple classification with clear constraints</li>
+                            <li><strong>Output Control</strong>: Strict format requirement ("ONLY the collection name")</li>
+                            <li><strong>Temperature</strong>: 0.1 for consistent routing decisions</li>
+                            <li><strong>Fallback</strong>: Keyword-based routing if AI fails</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- GOVERNMENT RESPONSE PROMPT -->
+                <div class="prompt-section">
+                    <h3>🏛️ Government Response Prompt</h3>
+                    <div class="prompt-code">
+                        <pre>system_prompt = """As a government technical advisor, provide COMPLETE, DETAILED answers with:
+
+MANDATORY SECTIONS for project queries:
+1. PROJECT OVERVIEW - Purpose, scope, strategic importance, current status
+2. FINANCIAL DETAILS - Complete budget breakdown, expenditures, funding sources, cost analysis
+3. TECHNICAL SPECIFICATIONS - Engineering details, design parameters, technical requirements
+4. TIMELINE & MILESTONES - Current progress, deadlines, delays, critical path analysis
+5. STAKEHOLDERS & GOVERNANCE - Responsible agencies, oversight bodies, decision-making processes
+6. ENVIRONMENTAL & SOCIAL IMPACT - Assessments, mitigation measures, compliance status
+7. RISKS & CHALLENGES - Identified risks, mitigation strategies, contingency plans
+8. BENEFITS & OUTCOMES - Expected benefits, performance metrics, success indicators
+
+CRITICAL REQUIREMENTS:
+- ALWAYS provide quantitative data and specific figures
+- If exact data isn't in context, provide typical industry standards/ranges
+- Use technical terminology appropriate for government professionals
+- Include actionable recommendations and strategic insights
+- Structure with clear headings and numbered points
+- NEVER state "not mentioned" or "not available" - always provide context
+- Focus on decision-support and actionable information
+
+Format with professional government reporting standards."""</pre>
+                    </div>
+                    <div class="analysis">
+                        <h4>🔍 Analysis:</h4>
+                        <ul>
+                            <li><strong>Structure</strong>: Highly structured with 8 mandatory sections</li>
+                            <li><strong>Data Requirements</strong>: Demands quantitative data and specific figures</li>
+                            <li><strong>Tone</strong>: Professional, technical, decision-support focused</li>
+                            <li><strong>Fallback Strategy</strong>: Use industry standards if exact data missing</li>
+                            <li><strong>Format</strong>: Clear headings, numbered points, professional reporting</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- PUBLIC RESPONSE PROMPT -->
+                <div class="prompt-section">
+                    <h3>👥 Public Response Prompt</h3>
+                    <div class="prompt-code">
+                        <pre>system_prompt = """Provide accurate information focusing on public benefits and community impacts. 
+- Use general timelines without specific dates
+- Focus on overall progress and benefits
+- Maintain transparency while being appropriate for public consumption
+- Structure information clearly for general understanding
+
+Format as clear, numbered points."""</pre>
+                    </div>
+                    <div class="analysis">
+                        <h4>🔍 Analysis:</h4>
+                        <ul>
+                            <li><strong>Simplicity</strong>: Much shorter and more flexible than government prompt</li>
+                            <li><strong>Focus</strong>: Public benefits, community impacts, general progress</li>
+                            <li><strong>Constraints</strong>: Avoid specific dates, use general timelines</li>
+                            <li><strong>Tone</strong>: Accessible, transparent, public-friendly</li>
+                            <li><strong>Format</strong>: Simple numbered points for easy reading</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- COMPARISON PROMPT -->
+                <div class="prompt-section">
+                    <h3>📊 Comparison Query Prompt</h3>
+                    <div class="prompt-code">
+                        <pre>system_prompt = """As a government technical advisor, provide COMPREHENSIVE comparisons with:
+
+ESSENTIAL COMPARISON ELEMENTS:
+1. Budget Analysis - Detailed financial breakdowns, cost comparisons, funding sources
+2. Technical Specifications - Engineering details, design parameters, technical requirements
+3. Timeline Analysis - Project schedules, milestones, completion status
+4. Governance Structures - Oversight mechanisms, responsible agencies, accountability
+5. Risk Assessment - Identified risks, mitigation strategies, contingency plans
+6. Performance Metrics - KPIs, success indicators, progress measurements
+7. Stakeholder Impact - Affected communities, economic impact, social considerations
+8. Regulatory Compliance - Environmental clearances, legal requirements, compliance status
+
+RESPONSE REQUIREMENTS:
+- Use exact figures and quantitative data
+- Provide actionable insights for decision-making
+- Include specific recommendations
+- Structure with clear comparative analysis
+- Never state "information not available" - provide context and general standards
+- Focus on strategic implications
+
+Format with clear section headers and data-rich content."""</pre>
+                    </div>
+                    <div class="analysis">
+                        <h4>🔍 Analysis:</h4>
+                        <ul>
+                            <li><strong>Comprehensive</strong>: 8 detailed comparison elements</li>
+                            <li><strong>Action-Oriented</strong>: Focus on decision-making and recommendations</li>
+                            <li><strong>Data-Driven</strong>: Requires exact figures and quantitative analysis</li>
+                            <li><strong>Strategic Focus</strong>: Emphasizes strategic implications</li>
+                            <li><strong>No Gaps</strong>: Never admit missing information - provide context</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SYSTEM 2: AI-DRIVEN INSIGHTS -->
+            <div class="system-column">
+                <h2>🤖 System 2: AI-Driven Insights Chatbot</h2>
+                <p style="text-align: center; margin-bottom: 2rem; color: var(--text-secondary);">Proactive Content Discovery with Dynamic Insight Generation</p>
+                
+                <!-- INSIGHT GENERATION PROMPT -->
+                <div class="prompt-section">
+                    <h3>💡 AI Insight Generation Prompt</h3>
+                    <div class="prompt-code">
+                        <pre>system_prompt = f"""You are an expert document analyst. Your task is to generate insightful and engaging topics/questions that would help users explore and understand the document content.
+
+{role_prompts.get(user_role, role_prompts['public'])}
+
+INSIGHT TEMPLATE (generate exactly this format for each insight):
+{{
+  "heading": "Creative and engaging title",
+  "description": "Brief description of what this insight explores (1-2 sentences)",
+  "query": "Specific question that when asked will reveal comprehensive information about this topic"
+}}
+
+CRITERIA:
+- Create insights that cover different aspects of the document
+- Ensure queries are specific and will yield comprehensive answers
+- Cover technical, strategic, economic, and implementation aspects
+- Make insights mutually exclusive but collectively exhaustive
+- Tailor the complexity and focus based on the user role
+
+Return ONLY a JSON array without any additional text."""</pre>
+                    </div>
+                    <div class="analysis">
+                        <h4>🔍 Analysis:</h4>
+                        <ul>
+                            <li><strong>Proactive</strong>: Generates questions instead of just answering them</li>
+                            <li><strong>Structured Output</strong>: Enforces exact JSON format with specific fields</li>
+                            <li><strong>Role-Adaptive</strong>: Uses different prompts for public vs government</li>
+                            <li><strong>Comprehensive</strong>: Covers multiple aspects (technical, strategic, economic)</li>
+                            <li><strong>Output Control</strong>: Strict JSON-only response requirement</li>
+                            <li><strong>Temperature</strong>: 0.8 for creative but consistent insights</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- GOVERNMENT INSIGHT PROMPT -->
+                <div class="prompt-section">
+                    <h3>🏛️ Government Insight Context</h3>
+                    <div class="prompt-code">
+                        <pre>role_prompts = {
+    "govt": """You are creating insights for government officials and technical experts. Focus on:
+- Budget analysis and financial details
+- Technical specifications and engineering details
+- Governance structures and compliance
+- Risk assessment and mitigation strategies
+- Performance metrics and KPIs
+- Strategic recommendations and decision support"""
+}</pre>
+                    </div>
+                    <div class="analysis">
+                        <h4>🔍 Analysis:</h4>
+                        <ul>
+                            <li><strong>Technical Focus</strong>: Budgets, specifications, governance, risk</li>
+                            <li><strong>Decision Support</strong>: Strategic recommendations and KPIs</li>
+                            <li><strong>Professional</strong>: Technical details and compliance requirements</li>
+                            <li><strong>Actionable</strong>: Focus on insights that support decision-making</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- PUBLIC INSIGHT PROMPT -->
+                <div class="prompt-section">
+                    <h3>👥 Public Insight Context</h3>
+                    <div class="prompt-code">
+                        <pre>role_prompts = {
+    "public": """You are creating insights for general public users. Focus on:
+- Public benefits and community impact
+- General progress and timelines
+- Environmental and social considerations
+- Accessible, non-technical information
+- Overall project goals and public value"""
+}</pre>
+                    </div>
+                    <div class="analysis">
+                        <h4>🔍 Analysis:</h4>
+                        <ul>
+                            <li><strong>Benefit-Focused</strong>: Public benefits and community impact</li>
+                            <li><strong>Accessible</strong>: Non-technical, easy-to-understand language</li>
+                            <li><strong>General</strong>: High-level progress and timelines</li>
+                            <li><strong>Value-Oriented</strong>: Project goals and public value</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- ANSWER GENERATION PROMPT -->
+                <div class="prompt-section">
+                    <h3>🎯 Answer Generation Prompt</h3>
+                    <div class="prompt-code">
+                        <pre>system_prompt = f"""You are an expert assistant.
+{role_prompts.get(user_role, role_prompts['public'])}
+
+Answer questions accurately and comprehensively based on the provided context.
+ALWAYS format your answer as clear, numbered points (minimum 2 points, maximum 15 points).
+Each point should be self-contained, informative, and address different aspects of the query.
+Ensure the points collectively provide a complete answer to the user's question.
+If the context doesn't contain enough information for at least 2 meaningful points, respond: "The requested information is not sufficiently available in the provided document to provide a comprehensive answer."
+Make each point concise yet detailed enough to be valuable.
+Maintain a professional, objective tone throughout."""</pre>
+                    </div>
+                    <div class="analysis">
+                        <h4>🔍 Analysis:</h4>
+                        <ul>
+                            <li><strong>Structured Format</strong>: Enforces numbered points (2-15)</li>
+                            <li><strong>Quality Control</strong>: Minimum 2 meaningful points required</li>
+                            <li><strong>Completeness</strong>: Points must collectively answer the question</li>
+                            <li><strong>Fallback</strong>: Specific response if insufficient information</li>
+                            <li><strong>Consistency</strong>: Professional, objective tone throughout</li>
+                            <li><strong>Role-Adaptive</strong>: Uses same role prompts as insight generation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KEY DIFFERENCES -->
+        <div class="key-differences">
+            <h2>🎯 Key Differences & Evolution</h2>
+            
+            <div class="difference-item">
+                <h3>🔄 From Reactive to Proactive</h3>
+                <p><strong>System 1</strong>: Waits for user questions → <strong>System 2</strong>: Suggests questions proactively</p>
+                <p><em>Evolution: Traditional Q&A → AI-curated content discovery</em></p>
+            </div>
+            
+            <div class="difference-item">
+                <h3>🎨 Prompt Structure & Flexibility</h3>
+                <p><strong>System 1</strong>: Highly structured, rigid sections and requirements</p>
+                <p><strong>System 2</strong>: Flexible insight generation with creative constraints</p>
+                <p><em>Evolution: Fixed response templates → Dynamic content creation</em></p>
+            </div>
+            
+            <div class="difference-item">
+                <h3>🤖 AI Role & Responsibility</h3>
+                <p><strong>System 1</strong>: AI as answer generator with strict formatting rules</p>
+                <p><strong>System 2</strong>: AI as content curator and question designer</p>
+                <p><em>Evolution: Answer machine → Conversation designer</em></p>
+            </div>
+            
+            <div class="difference-item">
+                <h3>🎯 Output Control & Validation</h3>
+                <p><strong>System 1</strong>: Manual validation of government responses for quality</p>
+                <p><strong>System 2</strong>: Built-in quality control through point requirements</p>
+                <p><em>Evolution: External validation → Internal quality gates</em></p>
+            </div>
+            
+            <div class="difference-item">
+                <h3>🚀 User Experience Approach</h3>
+                <p><strong>System 1</strong>: User must know what to ask → <strong>System 2</strong>: System shows what can be asked</p>
+                <p><em>Evolution: Blank slate → Guided discovery</em></p>
+            </div>
+            
+            <div class="difference-item">
+                <h3>💡 Temperature & Creativity</h3>
+                <p><strong>System 1</strong>: Low temperature (0.1-0.7) for consistency</p>
+                <p><strong>System 2</strong>: Higher temperature (0.8) for creative insights</p>
+                <p><em>Evolution: Consistency-focused → Creativity-enabled</em></p>
+            </div>
+        </div>
+
+        <!-- PROMPT DESIGN PHILOSOPHY -->
+        <div style="background: var(--dark-surface); padding: 2rem; border-radius: 1rem; margin-top: 3rem;">
+            <h2 style="color: var(--secondary); text-align: center; margin-bottom: 2rem;">🎨 Prompt Design Philosophy Evolution</h2>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div>
+                    <h3 style="color: var(--primary); margin-bottom: 1rem;">System 1: Precision Engineering</h3>
+                    <ul style="color: var(--text-secondary);">
+                        <li><strong>Control-focused</strong>: Strict output formatting</li>
+                        <li><strong>Risk-averse</strong>: Never admit missing information</li>
+                        <li><strong>Structured</strong>: Mandatory sections and requirements</li>
+                        <li><strong>Consistency</strong>: Low temperature for reliable routing</li>
+                        <li><strong>Comprehensive</strong>: Leave no aspect uncovered</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 style="color: var(--accent); margin-bottom: 1rem;">System 2: Creative Curation</h3>
+                    <ul style="color: var(--text-secondary);">
+                        <li><strong>Discovery-focused</strong>: Generate engaging topics</li>
+                        <li><strong>Quality-gated</strong>: Minimum point requirements</li>
+                        <li><strong>Flexible</strong>: Creative within JSON constraints</li>
+                        <li><strong>Innovation</strong>: Higher temperature for insights</li>
+                        <li><strong>User-centric</strong>: Reduce cognitive load on users</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div style="background: rgba(139, 92, 246, 0.1); padding: 1.5rem; border-radius: 0.75rem; margin-top: 2rem; border-left: 4px solid var(--accent);">
+                <h4 style="color: var(--accent); margin-bottom: 1rem;">🚀 The Evolution Path</h4>
+                <p><strong>From:</strong> "Here's a tool to answer your questions about our documents"</p>
+                <p><strong>To:</strong> "Here are the most interesting things you can discover in our documents, let me show you"</p>
+                <p style="margin-top: 1rem; color: var(--text-secondary);"><em>This represents a fundamental shift from reactive information retrieval to proactive knowledge discovery.</em></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
