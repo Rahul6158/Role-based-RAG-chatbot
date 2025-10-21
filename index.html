@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG System Documentation Hub</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --dark-bg: #0f172a;
+            --dark-surface: #1e293b;
+            --dark-card: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --accent: #8b5cf6;
+            --warning: #f59e0b;
+            --success: #22c55e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1e1b4b 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 3rem 2rem;
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .tagline {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .badge-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--dark-surface);
+            color: var(--text-primary);
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .badge-primary {
+            background: var(--primary);
+        }
+
+        .badge-secondary {
+            background: var(--secondary);
+        }
+
+        .badge-accent {
+            background: var(--accent);
+        }
+
+        .badge-warning {
+            background: var(--warning);
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .link-card {
+            background: var(--dark-surface);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            text-decoration: none;
+            color: inherit;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .link-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .link-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            border-color: var(--primary);
+        }
+
+        .link-card:hover::before {
+            left: 100%;
+        }
+
+        .link-card h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .link-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .link-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .tech-stack {
+            background: var(--dark-surface);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            margin-bottom: 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tech-stack h2 {
+            text-align: center;
+            color: var(--secondary);
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .tech-item {
+            background: var(--dark-card);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            transition: transform 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tech-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .tech-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .tech-item h3 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .tech-item p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .features {
+            background: var(--dark-surface);
+            border-radius: 1rem;
+            padding: 2.5rem;
+            margin-bottom: 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .features h2 {
+            text-align: center;
+            color: var(--accent);
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-item {
+            background: var(--dark-card);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border-left: 4px solid var(--success);
+        }
+
+        .feature-item h3 {
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-item p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 2rem 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .tagline {
+                font-size: 1.1rem;
+            }
+            
+            .links-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .link-card {
+                padding: 2rem;
+            }
+            
+            .tech-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .badge-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .badge {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .link-card {
+                padding: 1.5rem;
+            }
+            
+            .tech-stack, .features {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>RAG System Documentation Hub</h1>
+            <p class="tagline">Complete Documentation for Advanced Multi-Collection RAG Systems</p>
+            
+            <div class="badge-container">
+                <div class="badge badge-primary">
+                    <span>🚀</span>
+                    <span>Streamlit Frontend</span>
+                </div>
+                <div class="badge badge-secondary">
+                    <span>🗄️</span>
+                    <span>Weaviate Vector DB</span>
+                </div>
+                <div class="badge badge-accent">
+                    <span>🔤</span>
+                    <span>Sentence Transformers</span>
+                </div>
+                <div class="badge badge-warning">
+                    <span>💾</span>
+                    <span>JSONBin Storage</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="links-grid">
+            <a href=".\rag-multichat.html" class="link-card">
+                <div class="link-icon">🚀</div>
+                <h2>Enhanced Multi-Collection RAG</h2>
+                <p>Advanced Q&A system with intelligent query routing, dual-role access control, and comprehensive document search across multiple collections with sophisticated chat management.</p>
+                <div class="badge-container" style="justify-content: start; margin: 0;">
+                    <div class="badge" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Query Routing</div>
+                    <div class="badge" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Role-Based Access</div>
+                    <div class="badge" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Chat Persistence</div>
+                </div>
+            </a>
+
+            <a href=".\rag-singlechat.html" class="link-card">
+                <div class="link-icon">🤖</div>
+                <h2>AI-Driven Insights Chatbot</h2>
+                <p>Proactive content discovery system that automatically generates intelligent discussion topics and questions based on document content, with dynamic insight generation and interactive exploration.</p>
+                <div class="badge-container" style="justify-content: start; margin: 0;">
+                    <div class="badge" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">AI Insights</div>
+                    <div class="badge" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Proactive Discovery</div>
+                    <div class="badge" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Dynamic Content</div>
+                </div>
+            </a>
+
+            <a href=".\prompt-comparision.html" class="link-card">
+                <div class="link-icon">🎯</div>
+                <h2>Prompt Engineering Comparison</h2>
+                <p>Comprehensive analysis of prompt design strategies across both systems, showing the evolution from traditional Q&A to AI-driven content discovery with detailed technical breakdowns.</p>
+                <div class="badge-container" style="justify-content: start; margin: 0;">
+                    <div class="badge" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Prompt Analysis</div>
+                    <div class="badge" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">AI Strategy</div>
+                    <div class="badge" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">Design Evolution</div>
+                </div>
+            </a>
+        </section>
+
+        <section class="tech-stack">
+            <h2>🛠️ Technology Stack</h2>
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <div class="tech-icon">🎨</div>
+                    <h3>Streamlit</h3>
+                    <p>Python-based web framework for building interactive data applications with real-time updates and seamless Python integration.</p>
+                </div>
+                
+                <div class="tech-item">
+                    <div class="tech-icon">🗄️</div>
+                    <h3>Weaviate</h3>
+                    <p>Cloud-native vector database for semantic search, storing document embeddings and enabling fast similarity-based retrieval.</p>
+                </div>
+                
+                <div class="tech-item">
+                    <div class="tech-icon">🔤</div>
+                    <h3>Sentence Transformers</h3>
+                    <p>nomic-ai/nomic-embed-text-v1.5 model for generating high-quality text embeddings with 8192 context length support.</p>
+                </div>
+                
+                <div class="tech-item">
+                    <div class="tech-icon">💾</div>
+                    <h3>JSONBin</h3>
+                    <p>JSON storage service for persistent chat history, enabling conversation persistence across sessions with role-based separation.</p>
+                </div>
+                
+                <div class="tech-item">
+                    <div class="tech-icon">🤖</div>
+                    <h3>Groq AI</h3>
+                    <p>High-speed LLM inference using llama-3.1-8b-instant model for fast response generation and insight creation.</p>
+                </div>
+                
+                <div class="tech-item">
+                    <div class="tech-icon">📄</div>
+                    <h3>PDFPlumber</h3>
+                    <p>PDF text extraction library for processing document content and preparing it for vector storage and retrieval.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <h2>✨ Key System Features</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <h3>🎯 Intelligent Query Routing</h3>
+                    <p>Combines keyword-based and AI-powered routing to direct queries to the most relevant document collection automatically.</p>
+                </div>
+                
+                <div class="feature-item">
+                    <h3>👥 Dual-Role Access Control</h3>
+                    <p>Different interfaces and information levels for General Public users vs Government Officials with tailored responses.</p>
+                </div>
+                
+                <div class="feature-item">
+                    <h3>💡 AI-Driven Insight Generation</h3>
+                    <p>Automatically creates engaging discussion topics and questions based on document content analysis.</p>
+                </div>
+                
+                <div class="feature-item">
+                    <h3>🔍 Advanced Semantic Search</h3>
+                    <p>Vector-based similarity search with confidence scoring and source attribution for transparent information retrieval.</p>
+                </div>
+                
+                <div class="feature-item">
+                    <h3>💾 Persistent Chat Management</h3>
+                    <p>JSONBin-powered chat persistence with search, rename, and delete functionality for conversation management.</p>
+                </div>
+                
+                <div class="feature-item">
+                    <h3>🔄 Multi-Collection Support</h3>
+                    <p>Simultaneous search across PolavaramProject and AmaravathiCapitalCity document collections with comparison capabilities.</p>
+                </div>
+                
+                <div class="feature-item">
+                    <h3>🎨 Responsive Design</h3>
+                    <p>Fully responsive interfaces that work seamlessly across desktop, tablet, and mobile devices.</p>
+                </div>
+                
+                <div class="feature-item">
+                    <h3>⚡ Real-time Processing</h3>
+                    <p>Fast document retrieval and AI response generation with progress indicators and streaming where applicable.</p>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>RAG System Documentation Hub • Built with Streamlit, Weaviate, and Groq AI</p>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-secondary);">
+                Complete documentation for advanced multi-collection RAG systems with AI-driven insights
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Add smooth scrolling for better UX
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Add loading animation for link cards
+        document.querySelectorAll('.link-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                // Add loading state
+                this.style.opacity = '0.7';
+                this.style.pointerEvents = 'none';
+                
+                // You could add a proper loading spinner here
+                const originalContent = this.innerHTML;
+                this.innerHTML = '<div style="text-align: center; padding: 2rem;">🚀 Loading Documentation...</div>';
+                
+                setTimeout(() => {
+                    this.innerHTML = originalContent;
+                    this.style.opacity = '1';
+                    this.style.pointerEvents = 'auto';
+                }, 1500);
+            });
+        });
+    </script>
+</body>
+</html>
