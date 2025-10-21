@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Chat System Code Deep Dive</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --dark-bg: #0f172a;
+            --dark-surface: #1e293b;
+            --dark-card: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --accent: #8b5cf6;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #1e1b4b 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .card {
+            background: var(--dark-surface);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 0.5rem;
+        }
+
+        .code-section {
+            background: var(--dark-card);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            border-left: 4px solid var(--primary);
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .code-title {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .copy-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        pre {
+            color: var(--text-secondary);
+            font-family: 'Courier New', Courier, monospace;
+            line-height: 1.4;
+        }
+
+        .explanation {
+            background: rgba(99, 102, 241, 0.1);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .explanation h4 {
+            color: var(--secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .flow-diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .flow-step {
+            background: var(--dark-card);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border-left: 4px solid var(--accent);
+        }
+
+        .flow-step h4 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .routing-visual {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 1rem;
+            align-items: center;
+            margin: 2rem 0;
+            padding: 2rem;
+            background: var(--dark-card);
+            border-radius: 1rem;
+        }
+
+        .routing-method {
+            padding: 1.5rem;
+            background: var(--dark-surface);
+            border-radius: 0.75rem;
+            text-align: center;
+        }
+
+        .routing-arrow {
+            font-size: 2rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .routing-visual {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+            }
+            
+            .routing-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>RAG System Code Deep Dive</h1>
+            <p class="tagline">Comprehensive Explanation of Each Component with Focus on Routing Strategy</p>
+        </header>
+
+        <!-- CLIENT INITIALIZATION SECTION -->
+        <section class="card">
+            <h2>🔧 1. Client Initialization & Configuration</h2>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <div class="code-title">Core Client Setup</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
+                </div>
+                <pre><code>@st.cache_resource
+def init_weaviate_client():
+    """Initialize Weaviate client with error handling"""
+    try:
+        client = weaviate.connect_to_weaviate_cloud(
+            cluster_url=WEAVIATE_URL,
+            auth_credentials=weaviate.auth.AuthApiKey(WEAVIATE_API_KEY)
+        )
+        # Test connection
+        client.collections.list_all()
+        return client
+    except Exception as e:
+        st.error(f"Failed to connect to Weaviate: {e}")
+        return None
+
+@st.cache_resource
+def init_embedding_model():
+    """Initialize embedding model"""
+    try:
+        model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
+        return model
+    except Exception as e:
+        st.error(f"Failed to load embedding model: {e}")
+        return None
+
+@st.cache_resource
+def init_groq_client():
+    """Initialize Groq client"""
+    try:
+        return Groq(api_key=GROQ_API_KEY)
+    except Exception as e:
+        st.error(f"Failed to initialize Groq client: {e}")
+        return None</code></pre>
+            </div>
+
+            <div class="explanation">
+                <h4>🧠 What This Does & How It Works:</h4>
+                <p><strong>Purpose:</strong> Initializes all external service connections with proper error handling and caching.</p>
+                
+                <p><strong>Key Mechanisms:</strong></p>
+                <ul>
+                    <li><code>@st.cache_resource</code> - Streamlit decorator that caches the client instances to avoid re-initialization on every interaction</li>
+                    <li><strong>Weaviate Client</strong>: Connects to vector database for semantic search operations</li>
+                    <li><strong>Embedding Model</strong>: Loads SentenceTransformer model to convert text to vectors (embeddings)</li>
+                    <li><strong>Groq Client</strong>: Sets up connection to Groq's LLM API for text generation</li>
+                    <li><strong>Error Handling</strong>: Each function includes try-catch blocks with user-friendly error messages</li>
+                </ul>
+                
+                <p><strong>Why Important:</strong> These are the foundation of the entire RAG system - without these clients, no search or generation can occur.</p>
+            </div>
+        </section>
+
+        <!-- ROUTING STRATEGY SECTION -->
+        <section class="card">
+            <h2>🎯 2. Intelligent Query Routing Strategy</h2>
+            
+            <div class="routing-visual">
+                <div class="routing-method">
+                    <h4>🔤 Keyword Routing</h4>
+                    <p>Fast, rule-based matching using predefined keywords</p>
+                </div>
+                <div class="routing-arrow">→</div>
+                <div class="routing-method">
+                    <h4>🤖 AI Routing</h4>
+                    <p>LLM-powered classification for complex queries</p>
+                </div>
+                <div class="routing-arrow">→</div>
+                <div class="routing-method">
+                    <h4>🔄 Fallback</h4>
+                    <p>Default collection if both methods fail</p>
+                </div>
+            </div>
+
+            <div class="code-section">
+                <div class="code-header">
+                    <div class="code-title">Main Routing Function</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
+                </div>
+                <pre><code>def route_query(self, query: str) -> str:
+    """Main routing function with fallback strategy"""
+    # First try keyword-based routing (FAST)
+    collection = self.keyword_based_routing(query)
+    
+    # If keyword routing fails or is ambiguous, use model-based routing (SMART)
+    if not collection:
+        collection = self.model_based_routing(query)
+    
+    return collection</code></pre>
+            </div>
+
+            <div class="code-section">
+                <div class="code-header">
+                    <div class="code-title">Keyword-Based Routing</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
+                </div>
+                <pre><code>def keyword_based_routing(self, query: str) -> Optional[str]:
+    """Route query based on keyword matching"""
+    query_lower = query.lower()
+    
+    # Define comprehensive keywords for each collection
+    keyword_mapping = {
+        "PolavaramProject": [
+            "polavaram", "dam", "irrigation", "godavari", "water resources", 
+            "project", "reservoir", "canal", "hydropower", "andhra pradesh",
+            "water supply", "construction", "engineering", "ppa"
+        ],
+        "AmaravathiCapitalCity": [
+            "amaravathi", "amaravati", "capital", "city", "development", 
+            "infrastructure", "crda", "urban", "planning", "andhra pradesh",
+            "capital city", "master plan", "construction", "development authority"
+        ]
+    }
+    
+    # Calculate scores for each collection
+    scores = {}
+    for collection, keywords in keyword_mapping.items():
+        score = sum(1 for keyword in keywords if keyword in query_lower)
+        scores[collection] = score
+    
+    # Return collection with highest score, if any score > 0
+    max_score_collection = max(scores, key=scores.get)
+    return max_score_collection if scores[max_score_collection] > 0 else None</code></pre>
+            </div>
+
+            <div class="explanation">
+                <h4>🔤 Keyword Routing Explained:</h4>
+                <p><strong>How It Works:</strong></p>
+                <ol>
+                    <li><strong>Lowercase Conversion</strong>: Converts query to lowercase for case-insensitive matching</li>
+                    <li><strong>Keyword Scoring</strong>: Counts how many predefined keywords appear in the query for each collection</li>
+                    <li><strong>Score Calculation</strong>: Each matching keyword adds 1 point to the collection's score</li>
+                    <li><strong>Threshold Check</strong>: Only returns a collection if it has at least 1 matching keyword</li>
+                    <li><strong>Tie Handling</strong>: If multiple collections have same score, returns the first one (order matters)</li>
+                </ol>
+                
+                <p><strong>Example:</strong></p>
+                <ul>
+                    <li>Query: "What is the current status of Polavaram dam construction?"</li>
+                    <li>PolavaramProject: "polavaram" (+1), "dam" (+1), "construction" (+1) = <strong>Score: 3</strong></li>
+                    <li>AmaravathiCapitalCity: "construction" (+1) = <strong>Score: 1</strong></li>
+                    <li><strong>Result:</strong> Routes to PolavaramProject</li>
+                </ul>
+            </div>
+
+            <div class="code-section">
+                <div class="code-header">
+                    <div class="code-title">AI-Powered Model Routing</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
+                </div>
+                <pre><code>def model_based_routing(self, query: str) -> str:
+    """Use LLM to route query to the most relevant collection"""
+    if not self.groq_client:
+        return self.keyword_based_routing(query) or self.collections[0]
+        
+    routing_prompt = f"""
+    You are a query routing assistant. Classify the following user query into the most relevant document collection.
+
+    Available Collections:
+    1. PolavaramProject - Documents about Polavaram irrigation project, dam construction, water resources in Andhra Pradesh
+    2. AmaravathiCapitalCity - Documents about Amaravathi capital city development, urban planning, infrastructure
+
+    User Query: "{query}"
+
+    Respond with ONLY the collection name: either "PolavaramProject" or "AmaravathiCapitalCity"
+    """
+    
+    try:
+        response = self.groq_client.chat.completions.create(
+            messages=[{"role": "user", "content": routing_prompt}],
+            model=MODEL_NAME,
+            temperature=0.1,  # Low temperature for consistent routing
+            max_tokens=50
+        )
+        
+        selected_collection = response.choices[0].message.content.strip()
+        
+        # Validate and clean the response
+        if "PolavaramProject" in selected_collection:
+            return "PolavaramProject"
+        elif "AmaravathiCapitalCity" in selected_collection:
+            return "AmaravathiCapitalCity"
+        else:
+            return self.keyword_based_routing(query) or self.collections[0]
+            
+    except Exception as e:
+        st.error(f"Model routing failed: {e}")
+        return self.keyword_based_routing(query) or self.collections[0]</code></pre>
+            </div>
+
+            <div class="explanation">
+                <h4>🤖 AI Routing Explained:</h4>
+                <p><strong>When Used:</strong> When keyword routing returns None (no clear keyword matches) or for ambiguous queries</p>
+                
+                <p><strong>Key Features:</strong></p>
+                <ul>
+                    <li><strong>Structured Prompt</strong>: Clear instructions with collection descriptions</li>
+                    <li><strong>Low Temperature (0.1)</strong>: Ensures consistent routing decisions</li>
+                    <li><strong>Response Validation</strong>: Checks if LLM response contains valid collection names</li>
+                    <li><strong>Fallback Mechanism</strong>: If AI fails, falls back to keyword routing or default collection</li>
+                    <li><strong>Token Limit</strong>: Restricted to 50 tokens to control costs and ensure quick responses</li>
+                </ul>
+                
+                <p><strong>Example Scenario:</strong></p>
+                <ul>
+                    <li>Query: "Which project has better environmental impact assessment?"</li>
+                    <li>Keyword Routing: Fails (no clear keywords for either project)</li>
+                    <li>AI Routing: Analyzes context and determines this is a comparison query needing both collections</li>
+                    <li>Result: Routes to appropriate handling for comparison queries</li>
+                </ul>
+            </div>
+
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <h4>🚀 Routing Strategy Benefits</h4>
+                    <p><strong>Speed + Accuracy</strong>: Keyword routing is fast for clear queries, AI routing handles edge cases</p>
+                    <p><strong>Cost Effective</strong>: Only uses LLM when necessary, reducing API costs</p>
+                    <p><strong>Robust</strong>: Multiple fallbacks ensure system never fails completely</p>
+                    <p><strong>Adaptable</strong>: Easy to add new collections by updating keyword lists and prompts</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- VECTOR SEARCH SECTION -->
+        <section class="card">
+            <h2>🔍 3. Vector Search & Retrieval</h2>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <div class="code-title">Semantic Search Implementation</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
+                </div>
+                <pre><code>def search_single_collection(self, query: str, collection_name: str, top_k: int = 5):
+    """Search in a single collection with enhanced source tracking"""
+    if not self.weaviate_client or not self.embedding_model:
+        return "", []
+        
+    try:
+        collection = self.weaviate_client.collections.get(collection_name)
+        
+        # Generate query embedding
+        query_embedding = self.embedding_model.encode(query).tolist()
+        
+        # Perform vector search
+        response = collection.query.near_vector(
+            near_vector=query_embedding,
+            limit=top_k,
+            return_metadata=["distance", "score"]
+        )
+        
+        retrieved_docs = []
+        if response.objects:
+            for obj in response.objects:
+                # Handle different possible field names
+                content = obj.properties.get('content') or obj.properties.get('text') or ""
+                retrieved_docs.append({
+                    'content': content,
+                    'page': obj.properties.get('page', 'N/A'),
+                    'chunk_id': obj.properties.get('chunk_id', 'N/A'),
+                    'distance': obj.metadata.distance if obj.metadata else 'N/A',
+                    'confidence': 1 - (obj.metadata.distance if obj.metadata else 0.5),
+                    'collection': collection_name,
+                    'document_type': obj.properties.get('document_type', 'Technical Document'),
+                    'source': obj.properties.get('source', 'Project Documentation')
+                })
+        
+        context = "\n\n".join([doc['content'] for doc in retrieved_docs])
+        return context, retrieved_docs
+        
+    except Exception as e:
+        st.error(f"Error searching collection {collection_name}: {e}")
+        return "", []</code></pre>
+            </div>
+
+            <div class="explanation">
+                <h4>🔍 How Vector Search Works:</h4>
+                <p><strong>Step-by-Step Process:</strong></p>
+                <ol>
+                    <li><strong>Embedding Generation</strong>: Converts query text into numerical vector using SentenceTransformer</li>
+                    <li><strong>Vector Similarity Search</strong>: Finds document chunks with vectors most similar to query vector</li>
+                    <li><strong>Distance Calculation</strong>: Weaviate computes cosine distance between vectors</li>
+                    <li><strong>Confidence Scoring</strong>: Converts distance to confidence score (1 - distance)</li>
+                    <li><strong>Metadata Enrichment</strong>: Adds source information for citation and transparency</li>
+                </ol>
+                
+                <p><strong>Key Features:</strong></p>
+                <ul>
+                    <li><strong>Field Flexibility</strong>: Handles different field names ('content', 'text') in documents</li>
+                    <li><strong>Confidence Metrics</strong>: Provides measurable confidence scores for each result</li>
+                    <li><strong>Source Tracking</strong>: Tracks page numbers, document types, and collections</li>
+                    <li><strong>Error Resilience</strong>: Continues operation even if some searches fail</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ROLE-BASED RESPONSE SECTION -->
+        <section class="card">
+            <h2>👥 4. Role-Based Response Generation</h2>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <div class="code-title">Dual-Persona System Prompts</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
+                </div>
+                <pre><code>def _get_role_based_system_prompt(self, user_role: str, query_type: str = "general") -> str:
+    """Enhanced system prompt based on user role"""
+    if user_role == "govt":
+        if query_type == "comparison":
+            return """As a government technical advisor, provide COMPREHENSIVE comparisons with:
+ESSENTIAL COMPARISON ELEMENTS:
+1. Budget Analysis - Detailed financial breakdowns, cost comparisons
+2. Technical Specifications - Engineering details, design parameters
+3. Timeline Analysis - Project schedules, milestones, completion status
+4. Governance Structures - Oversight mechanisms, responsible agencies
+...
+RESPONSE REQUIREMENTS:
+- Use exact figures and quantitative data
+- Provide actionable insights for decision-making
+- Include specific recommendations
+- Structure with clear comparative analysis
+- Never state "information not available" - provide context"""
+        else:
+            return """As a government technical advisor, provide COMPLETE, DETAILED answers with:
+MANDATORY SECTIONS for project queries:
+1. PROJECT OVERVIEW - Purpose, scope, strategic importance, current status
+2. FINANCIAL DETAILS - Complete budget breakdown, expenditures, funding sources
+3. TECHNICAL SPECIFICATIONS - Engineering details, design parameters
+...
+CRITICAL REQUIREMENTS:
+- ALWAYS provide quantitative data and specific figures
+- If exact data isn't in context, provide typical industry standards
+- Use technical terminology appropriate for government professionals
+- Include actionable recommendations and strategic insights"""
+    else:
+        # Public user prompts are simpler and focus on benefits
+        return """Provide accurate information focusing on public benefits and community impacts. 
+- Use general timelines without specific dates
+- Focus on overall progress and benefits
+- Maintain transparency while being appropriate for public consumption
+- Structure information clearly for general understanding"""</code></pre>
+            </div>
+
+            <div class="explanation">
+                <h4>👥 Role-Based System Explained:</h4>
+                <p><strong>Government Officials Get:</strong></p>
+                <ul>
+                    <li><strong>Detailed Technical Data</strong>: Budgets, specifications, timelines</li>
+                    <li><strong>Actionable Insights</strong>: Recommendations, risk assessments, strategic advice</li>
+                    <li><strong>Quantitative Information</strong>: Exact figures, metrics, performance data</li>
+                    <li><strong>Structured Format</strong>: Clear sections with headers and bullet points</li>
+                    <li><strong>Professional Tone</strong>: Technical terminology and formal language</li>
+                </ul>
+                
+                <p><strong>General Public Gets:</strong></p>
+                <ul>
+                    <li><strong>Benefit-Focused Information</strong>: How projects help communities</li>
+                    <li><strong>General Timelines</strong>: Without sensitive completion dates</li>
+                    <li><strong>Simplified Language</strong>: Easy to understand explanations</li>
+                    <li><strong>Transparent but Appropriate</strong>: Honest but not overly technical</li>
+                </ul>
+                
+                <p><strong>Why This Matters:</strong> Ensures information security while providing appropriate detail levels for different user types.</p>
+            </div>
+        </section>
+
+        <!-- CHAT STORAGE SECTION -->
+        <section class="card">
+            <h2>💾 5. Chat Storage & Persistence</h2>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <div class="code-title">JSONBin Storage System</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
+                </div>
+                <pre><code>class ChatStorage:
+    def __init__(self):
+        self.master_key = JSONBIN_MASTER_KEY
+        self.public_bin_id = JSONBIN_PUBLIC_CHATS_ID
+        self.govt_bin_id = JSONBIN_GOVT_CHATS_ID
+        self.base_url = JSONBIN_BASE_URL
+        
+    def _get_bin_id(self, user_role: str) -> str:
+        """Get the appropriate bin ID based on user role"""
+        return self.public_bin_id if user_role == "public" else self.govt_bin_id
+    
+    def load_chats(self, user_role: str) -> List[Dict]:
+        """Load all chats for a specific role"""
+        try:
+            bin_id = self._get_bin_id(user_role)
+            response = requests.get(f"{self.base_url}/{bin_id}/latest", 
+                                  headers=self._get_headers())
+            
+            if response.status_code == 200:
+                data = response.json()
+                chats = data.get('record', {}).get('chats', [])
+                # Sort chats by updated_at in descending order (newest first)
+                chats.sort(key=lambda x: x.get('updated_at', ''), reverse=True)
+                return chats
+            else:
+                st.error(f"Failed to load chats: {response.status_code}")
+                return []
+                
+        except Exception as e:
+            st.error(f"Error loading chats: {e}")
+            return []</code></pre>
+            </div>
+
+            <div class="explanation">
+                <h4>💾 Storage System Explained:</h4>
+                <p><strong>Separation of Concerns:</strong></p>
+                <ul>
+                    <li><strong>Public Chats</strong>: Stored in separate JSONBin from government chats</li>
+                    <li><strong>Role-Based Access</strong>: Each role only sees their own conversation history</li>
+                    <li><strong>Automatic Sorting</strong>: Chats sorted by update time (newest first)</li>
+                </ul>
+                
+                <p><strong>Data Structure:</strong></p>
+                <ul>
+                    <li><strong>Chat ID</strong>: Unique identifier for each conversation</li>
+                    <li><strong>Messages Array</strong>: Complete conversation history</li>
+                    <li><strong>Metadata</strong>: Creation time, last update, user role, collection used</li>
+                    <li><strong>Sources</strong>: Retrieved documents with confidence scores</li>
+                </ul>
+                
+                <p><strong>Benefits:</strong> Persistent conversations across sessions, role-based data isolation, easy chat management.</p>
+            </div>
+        </section>
+
+        <!-- MAIN PROCESSING SECTION -->
+        <section class="card">
+            <h2>⚡ 6. Main Query Processing Flow</h2>
+            
+            <div class="code-section">
+                <div class="code-header">
+                    <div class="code-title">Central Processing Function</div>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
+                </div>
+                <pre><code>def process_query(self, query: str, user_role: str) -> Tuple[str, str, List[Dict]]:
+    """Enhanced main function to process user queries"""
+    query_lower = query.lower()
+    
+    # Determine search parameters based on role
+    search_top_k = 8 if user_role == "govt" else 4
+    
+    # Check for multi-collection operations
+    if any(keyword in query_lower for keyword in [
+        "compare", "comparison", "difference between", "similarities", 
+        "contrast", "versus", "vs", "both", "each"
+    ]):
+        selected_collection = "multiple"
+        answer, sources = self.handle_comparison_query(query, user_role)
+        
+    elif any(keyword in query_lower for keyword in [
+        "summarize all", "all documents", "both collections", "overall summary",
+        "everything", "all information", "complete overview", "comprehensive summary"
+    ]):
+        selected_collection = "all"
+        answer, sources = self.handle_summary_query(query, user_role)
+        
+    else:
+        # Route to specific collection
+        selected_collection = self.router.route_query(query)
+        context, sources = self.search_single_collection(query, selected_collection, top_k=search_top_k)
+        answer = self.generate_answer(query, context, sources, user_role)
+    
+    return answer, selected_collection, sources</code></pre>
+            </div>
+
+            <div class="explanation">
+                <h4>⚡ Processing Flow Explained:</h4>
+                <p><strong>Step-by-Step Logic:</strong></p>
+                <ol>
+                    <li><strong>Query Analysis</strong>: Checks for comparison or summary keywords</li>
+                    <li><strong>Role-Based Configuration</strong>: Government gets more search results (top_k=8 vs 4)</li>
+                    <li><strong>Multi-Collection Detection</strong>: Identifies queries needing data from both collections</li>
+                    <li><strong>Intelligent Routing</strong>: Uses routing strategy for single-collection queries</li>
+                    <li><strong>Context-Aware Search</strong>: Searches appropriate collection(s) based on query type</li>
+                    <li><strong>Role-Tailored Generation</strong>: Generates response using appropriate system prompt</li>
+                </ol>
+                
+                <p><strong>Smart Features:</strong></p>
+                <ul>
+                    <li><strong>Adaptive Search Depth</strong>: Government queries search more documents for completeness</li>
+                    <li><strong>Query Intent Recognition</strong>: Detects comparison/summary intent without LLM</li>
+                    <li><strong>Efficient Resource Usage</strong>: Only searches relevant collections</li>
+                    <li><strong>Consistent Output</strong>: Always returns answer, collection, and sources tuple</li>
+                </ul>
+            </div>
+        </section>
+
+        <footer style="text-align: center; margin-top: 3rem; padding: 2rem 0; color: var(--text-secondary);">
+            <p>RAG System Code Explanation - Complete Technical Breakdown</p>
+            <p>Understanding these components is key to maintaining and extending the system</p>
+        </footer>
+    </div>
+
+    <script>
+        function copyCode(button) {
+            const codeSection = button.closest('.code-section');
+            const code = codeSection.querySelector('code').textContent;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.style.background = 'var(--success)';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = 'var(--primary)';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Driven Insights Chatbot - Complete Explanation</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --dark-bg: #0f172a;
+            --dark-surface: #1e293b;
+            --dark-card: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        h1 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .card {
+            background: var(--dark-surface);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .card h2 {
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .code-block {
+            background: var(--dark-card);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        
+        pre {
+            color: var(--text-secondary);
+            font-family: 'Courier New', monospace;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .flow-step {
+            background: var(--dark-card);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid var(--secondary);
+        }
+        
+        .architecture {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .arch-component {
+            background: var(--dark-surface);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI-Driven Insights Chatbot - Complete Explanation</h1>
+            <p>Advanced RAG System with Dynamic Insight Generation</p>
+        </header>
+
+        <!-- OVERVIEW SECTION -->
+        <section class="card">
+            <h2>🎯 System Overview</h2>
+            <p>This is an <strong>AI-Driven Insights Chatbot</strong> that automatically generates intelligent discussion topics and questions based on document content, then provides detailed answers using Retrieval-Augmented Generation (RAG).</p>
+            
+            <div class="architecture">
+                <div class="arch-component">
+                    <h3>🤖 AI Insight Generation</h3>
+                    <p>Automatically creates discussion topics from documents</p>
+                </div>
+                <div class="arch-component">
+                    <h3>👥 Dual-Role System</h3>
+                    <p>Different interfaces for Public vs Government users</p>
+                </div>
+                <div class="arch-component">
+                    <h3>🔍 Smart RAG</h3>
+                    <p>Retrieves relevant document chunks for answers</p>
+                </div>
+                <div class="arch-component">
+                    <h3>💬 Interactive Chat</h3>
+                    <p>Follow-up conversations about insights</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CORE CONFIGURATION -->
+        <section class="card">
+            <h2>⚙️ Core Configuration & Clients</h2>
+            
+            <div class="code-block">
+                <pre><code># Configuration
+WEAVIATE_URL = "m8l0s1ucsfgj0pcvv4k4ra.c0.asia-southeast1.gcp.weaviate.cloud"
+WEAVIATE_API_KEY = "d3pqMVVjeFZuNk9ZeXFTM19PYXdsVlBZdGQ3OXIzTGtvZHJQV3J6MHA2czZjdWcwcmJtQ3B1ZUd2VHhJPV92MjAw"
+GROQ_API_KEY = "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"
+MODEL_NAME = "llama-3.1-8b-instant"
+
+# Initialize clients
+@st.cache_resource
+def init_weaviate_client():
+    return weaviate.connect_to_weaviate_cloud(...)
+
+@st.cache_resource
+def init_embedding_model():
+    return SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', ...)
+
+@st.cache_resource
+def init_groq_client():
+    return Groq(api_key=GROQ_API_KEY)</code></pre>
+            </div>
+            
+            <p><strong>What This Does:</strong></p>
+            <ul>
+                <li><strong>Weaviate Client</strong>: Connects to vector database for document storage and semantic search</li>
+                <li><strong>Embedding Model</strong>: Converts text to vectors using SentenceTransformers</li>
+                <li><strong>Groq Client</strong>: Provides fast LLM inference for generating insights and answers</li>
+                <li><strong>@st.cache_resource</strong>: Caches clients to avoid re-initialization</li>
+            </ul>
+        </section>
+
+        <!-- INSIGHT GENERATION -->
+        <section class="card">
+            <h2>💡 AI Insight Generation System</h2>
+            
+            <div class="code-block">
+                <pre><code>def generate_ai_insights(collection_name, user_role, num_insights=4):
+    # Get sample content from the collection
+    samples = get_collection_samples(collection_name)
+    
+    # Role-based system prompts
+    role_prompts = {
+        "public": "You are creating insights for general public users...",
+        "govt": "You are creating insights for government officials..."
+    }
+    
+    system_prompt = f"""You are an expert document analyst...
+INSIGHT TEMPLATE (generate exactly this format for each insight):
+{{
+  "heading": "Creative and engaging title",
+  "description": "Brief description...",
+  "query": "Specific question that when asked will reveal comprehensive information"
+}}"""</code></pre>
+            </div>
+            
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <h4>Step 1: Document Sampling</h4>
+                    <p>Fetches random document samples from Weaviate to understand collection content</p>
+                </div>
+                <div class="flow-step">
+                    <h4>Step 2: Role-Based Prompting</h4>
+                    <p>Uses different system prompts for Public vs Government users</p>
+                </div>
+                <div class="flow-step">
+                    <h4>Step 3: Structured Generation</h4>
+                    <p>LLM generates insights in exact JSON format with heading, description, and query</p>
+                </div>
+                <div class="flow-step">
+                    <h4>Step 4: Validation & Fallback</h4>
+                    <p>If AI fails, uses predefined default insights</p>
+                </div>
+            </div>
+            
+            <p><strong>Example Insight Output:</strong></p>
+            <div class="code-block">
+                <pre><code>[
+  {
+    "heading": "Budget Analysis",
+    "description": "Detailed financial breakdown and funding allocation", 
+    "query": "What is the detailed budget breakdown for Polavaram project?",
+    "id": "polavaramproject_govt_1",
+    "collection": "PolavaramProject",
+    "role": "govt"
+  }
+]</code></pre>
+            </div>
+        </section>
+
+        <!-- ROLE-BASED SYSTEM -->
+        <section class="card">
+            <h2>👥 Dual-Role Information System</h2>
+            
+            <div class="code-block">
+                <pre><code>role_prompts = {
+    "public": """Focus on:
+- Public benefits and community impact
+- General progress and timelines  
+- Environmental and social considerations
+- Accessible, non-technical information""",
+    
+    "govt": """Focus on:
+- Budget analysis and financial details
+- Technical specifications and engineering details  
+- Governance structures and compliance
+- Risk assessment and mitigation strategies"""
+}</code></pre>
+            </div>
+            
+            <p><strong>Public User Experience:</strong></p>
+            <ul>
+                <li>Simple, benefit-focused insights</li>
+                <li>General timelines without specific dates</li>
+                <li>Community impact and environmental considerations</li>
+                <li>Non-technical, accessible language</li>
+            </ul>
+            
+            <p><strong>Government User Experience:</strong></p>
+            <ul>
+                <li>Detailed technical specifications</li>
+                <li>Budget breakdowns and financial analysis</li>
+                <li>Compliance and governance details</li>
+                <li>Risk assessments and strategic recommendations</li>
+            </ul>
+        </section>
+
+        <!-- RAG SYSTEM -->
+        <section class="card">
+            <h2>🔍 Retrieval-Augmented Generation (RAG) System</h2>
+            
+            <div class="code-block">
+                <pre><code>def retrieve_context(query, collection_name, top_k=5):
+    # Generate query embedding
+    query_embedding = model.encode(query)
+    
+    # Perform vector search
+    response = collection.query.near_vector(
+        near_vector=query_embedding,
+        limit=top_k,
+        return_metadata=["distance", "score"]
+    )
+    
+    retrieved_docs = []
+    for obj in response.objects:
+        retrieved_docs.append({
+            'content': obj.properties['content'],
+            'page': obj.properties.get('page', 'N/A'),
+            'chunk_id': obj.properties.get('chunk_id', 'N/A'),
+            'distance': obj.metadata.distance,
+            'collection': collection_name
+        })
+    
+    return retrieved_docs</code></pre>
+            </div>
+            
+            <p><strong>RAG Process Flow:</strong></p>
+            <ol>
+                <li><strong>Query Embedding</strong>: Convert user question to vector representation</li>
+                <li><strong>Semantic Search</strong>: Find most similar document chunks in Weaviate</li>
+                <li><strong>Context Retrieval</strong>: Extract relevant content with metadata</li>
+                <li><strong>Answer Generation</strong>: LLM creates answer using retrieved context</li>
+                <li><strong>Source Attribution</strong>: Show users where information came from</li>
+            </ol>
+        </section>
+
+        <!-- STREAMLIT UI -->
+        <section class="card">
+            <h2>🎨 Streamlit User Interface</h2>
+            
+            <div class="code-block">
+                <pre><code>def main():
+    st.set_page_config(...)
+    
+    # Session state management
+    if 'user_role' not in st.session_state:
+        st.session_state.user_role = "public"
+    if 'current_collection' not in st.session_state:
+        st.session_state.current_collection = None
+    if 'insights' not in st.session_state:
+        st.session_state.insights = {}
+    
+    # Sidebar with role selection and insight cards
+    with st.sidebar:
+        # Role selection buttons
+        # Insight generation and display
+        for collection in collections:
+            insights = st.session_state.insights.get(insight_key, [])
+            for insight in insights:
+                if st.button(insight_content):
+                    # Handle insight click - auto-ask the question</code></pre>
+            </div>
+            
+            <p><strong>UI Components:</strong></p>
+            <ul>
+                <li><strong>Sidebar</strong>: Role selection and insight discovery</li>
+                <li><strong>Insight Cards</strong>: Clickable buttons that auto-populate chat</li>
+                <li><strong>Main Chat Area</strong>: Conversation interface with sources</li>
+                <li><strong>Auto-Initialization</strong>: Starts with random insight if none selected</li>
+            </ul>
+            
+            <p><strong>Session State Management:</strong></p>
+            <ul>
+                <li><code>user_role</code>: Tracks current user type (public/govt)</li>
+                <li><code>insights</code>: Caches generated insights per collection/role</li>
+                <li><code>current_messages</code>: Maintains chat history</li>
+                <li><code>sources</code>: Stores document sources for attribution</li>
+            </ul>
+        </section>
+
+        <!-- WORKFLOW EXPLANATION -->
+        <section class="card">
+            <h2>🔄 Complete System Workflow</h2>
+            
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <h4>1. User Role Selection</h4>
+                    <p>User chooses "General Public" or "Government Official" - triggers insight regeneration</p>
+                </div>
+                <div class="flow-step">
+                    <h4>2. AI Insight Generation</h4>
+                    <p>System samples documents and uses LLM to create role-appropriate discussion topics</p>
+                </div>
+                <div class="flow-step">
+                    <h4>3. Insight Discovery</h4>
+                    <p>User browses AI-generated insights in sidebar as clickable cards</p>
+                </div>
+                <div class="flow-step">
+                    <h4>4. Auto-Question Asking</h4>
+                    <p>Clicking an insight automatically asks its predefined question via RAG</p>
+                </div>
+                <div class="flow-step">
+                    <h4>5. Interactive Chat</h4>
+                    <p>User can ask follow-up questions about the current insight topic</p>
+                </div>
+                <div class="flow-step">
+                    <h4>6. Source Attribution</h4>
+                    <p>All answers show retrieved document sources for transparency</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- KEY INNOVATIONS -->
+        <section class="card">
+            <h2>🚀 Key Innovations & Benefits</h2>
+            
+            <h3>🎯 Proactive Content Discovery</h3>
+            <p>Instead of making users think of questions, the system <strong>automatically suggests relevant topics</strong> based on actual document content.</p>
+            
+            <h3>👥 Context-Aware Personalization</h3>
+            <p>Same documents, completely different insights and answers based on user role and expertise level.</p>
+            
+            <h3>🔍 Transparent Source Attribution</h3>
+            <p>Every answer shows exactly which document pages and chunks were used, building trust.</p>
+            
+            <h3>⚡ Intelligent Caching</h3>
+            <p>Insights are cached per role/collection combination to avoid redundant AI calls.</p>
+            
+            <h3>🔄 Seamless User Experience</h3>
+            <p>Clicking an insight automatically populates the chat with the perfect question and comprehensive answer.</p>
+        </section>
+
+        <!-- USE CASES -->
+        <section class="card">
+            <h2>💼 Practical Use Cases</h2>
+            
+            <h3>For General Public:</h3>
+            <ul>
+                <li>Quickly understand project benefits and impacts</li>
+                <li>Get clear, non-technical explanations</li>
+                <li>Learn about community benefits and timelines</li>
+            </ul>
+            
+            <h3>For Government Officials:</h3>
+            <ul>
+                <li>Deep dive into technical specifications</li>
+                <li>Analyze budgets and financial planning</li>
+                <li>Review compliance and risk assessments</li>
+                <li>Get strategic recommendations for decision-making</li>
+            </ul>
+            
+            <h3>For Document Exploration:</h3>
+            <ul>
+                <li>Discover hidden topics in large document collections</li>
+                <li>Get AI-curated starting points for research</li>
+                <li>Explore different aspects of complex projects</li>
+            </ul>
+        </section>
+
+        <!-- TECHNICAL ARCHITECTURE -->
+        <section class="card">
+            <h2>🏗️ Technical Architecture Summary</h2>
+            
+            <div class="code-block">
+                <pre><code>Application Stack:
+Frontend: Streamlit (Python)
+Vector DB: Weaviate (cloud)
+Embeddings: SentenceTransformers (nomic-ai/nomic-embed-text-v1.5)
+LLM: Groq (llama-3.1-8b-instant)
+Document Processing: pdfplumber
+Caching: Streamlit session state + @cache_resource</code></pre>
+            </div>
+            
+            <p><strong>Data Flow:</strong></p>
+            <ol>
+                <li>Documents → Weaviate (pre-processed and vectorized)</li>
+                <li>User Role → AI Insight Generation → Cached Insights</li>
+                <li>Insight Click → RAG Query → Document Retrieval → LLM Answer</li>
+                <li>Follow-up Questions → Continued RAG Conversations</li>
+            </ol>
+            
+            <p><strong>Key Features:</strong></p>
+            <ul>
+                <li>Zero initial user input required (auto-starts with insights)</li>
+                <li>Completely dynamic content discovery</li>
+                <li>Role-appropriate information delivery</li>
+                <li>Full transparency with source attribution</li>
+                <li>Scalable across multiple document collections</li>
+            </ul>
+        </section>
+    </div>
+</body>
+</html>
